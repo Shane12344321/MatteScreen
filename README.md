@@ -5,7 +5,7 @@ paints a soft, procedural paper-grain texture over your whole screen to take the
 glare and harsh contrast out of everything you do. A free alternative to
 [Paperman](https://paperman.cc/).
 
-**[Download for macOS (DMG)](https://github.com/Shane12344321/MatteScreen/releases/latest/download/MatteScreen-1.0.0.dmg)**
+**[Download for macOS (Apple Silicon)](https://github.com/Shane12344321/MatteScreen/releases/latest/download/MatteScreen-1.0.0-arm64.dmg)**
 
 - **Cross-platform** — Windows, macOS, and Linux (Electron).
 - **Click-through** — the overlay floats above every app; your clicks, scrolls
