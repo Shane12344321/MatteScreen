@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MatteScreen — texture demo</title>
+    <style>
+      :root { font-family: Georgia, "Times New Roman", serif; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #ffffff;
+        color: #16140f;
+        line-height: 1.6;
+      }
+      .wrap { max-width: 720px; margin: 0 auto; padding: 80px 28px 140px; }
+      h1 { font-size: 40px; line-height: 1.1; margin: 0 0 8px; }
+      .lede { font-size: 18px; opacity: 0.75; margin: 0 0 36px; }
+      h2 { font-size: 24px; margin: 36px 0 8px; }
+      p { font-size: 17px; }
+      .swatches { display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0 0; }
+      .swatch { width: 84px; height: 56px; border-radius: 8px; border: 1px solid #0001; }
+
+      /* ---- The paper overlay (same idea as the Electron app) ---- */
+      #tint { position: fixed; inset: 0; pointer-events: none; opacity: 0; transition: .2s; }
+      #grain { position: fixed; inset: 0; pointer-events: none; opacity: 0; mix-blend-mode: multiply; transition: .2s; }
+      #grain svg { width: 100%; height: 100%; display: block; }
+
+      /* ---- Floating control panel ---- */
+      .panel {
+        position: fixed; right: 18px; bottom: 18px; z-index: 10;
+        background: rgba(255,255,255,.92); backdrop-filter: blur(8px);
+        border: 1px solid #0001; border-radius: 14px; padding: 14px 16px;
+        box-shadow: 0 8px 30px rgba(0,0,0,.12); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        width: 248px;
+      }
+      .panel h3 { margin: 0 0 10px; font-size: 14px; }
+      .panel label { font-size: 12px; opacity: .7; display: block; margin: 10px 0 4px; }
+      .panel select, .panel input[type=range] { width: 100%; }
+      .panel .toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <div id="tint"></div>
+    <div id="grain">
+      <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <defs>
+          <filter id="pf" x="0" y="0" width="100%" height="100%">
+            <feTurbulence id="ft" type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" result="n" />
+            <feColorMatrix id="fs" in="n" type="saturate" values="0" />
+          </filter>
+        </defs>
+        <rect width="100%" height="100%" filter="url(#pf)" />
+      </svg>
+    </div>
+
+    <div class="wrap">
+      <h1>Make your screen feel like paper.</h1>
+      <p class="lede">Soft, paper-like textures that settle over your whole screen, taking the glare and harsh contrast out of everything you do.</p>
+      <p>This page is a standalone preview of the texture engine used by the MatteScreen desktop app. Toggle the effect with the panel in the corner and switch between textures. In the real app, this same layer floats above every window on every monitor, fully click-through.</p>
+      <h2>Not a blue light filter.</h2>
+      <p>Night Shift and f.lux change color temperature. MatteScreen changes screen texture — it diffuses highlights and attenuates contrast, like a physical matte screen protector, but in software.</p>
+      <h2>Procedural grain</h2>
+      <p>The texture is generated with SVG <code>feTurbulence</code>, so it stays crisp at any resolution and ships with zero image assets.</p>
+      <div class="swatches">
+        <div class="swatch" style="background:#fff"></div>
+        <div class="swatch" style="background:#111"></div>
+        <div class="swatch" style="background:linear-gradient(90deg,#f33,#3f3,#33f)"></div>
+        <div class="swatch" style="background:#d9a441"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>MatteScreen — demo</h3>
+      <label class="toggle"><input type="checkbox" id="on" checked /> Paper effect on</label>
+      <label for="tex">Texture</label>
+      <select id="tex"></select>
+      <label for="int">Intensity — <span id="intv">22%</span></label>
+      <input type="range" id="int" min="15" max="30" value="22" />
+    </div>
+
+    <script>
+      const TEXTURES = {
+        classic_matte: { label: "Classic Matte", baseFrequency: 0.9, numOctaves: 2, type: "fractalNoise", saturate: 0, tint: "transparent", tintOpacity: 0, blend: "multiply" },
+        whisper_weave: { label: "Whisper Weave", baseFrequency: 0.42, numOctaves: 3, type: "turbulence", saturate: 0, tint: "#efe9df", tintOpacity: 0.05, blend: "overlay" },
+        sunbaked_parchment: { label: "Sunbaked Parchment", baseFrequency: 0.7, numOctaves: 2, type: "fractalNoise", saturate: 0, tint: "#d9a441", tintOpacity: 0.16, blend: "multiply" },
+        saddle_linen: { label: "Saddle Linen", baseFrequency: 0.32, numOctaves: 4, type: "turbulence", saturate: 0, tint: "#caa56b", tintOpacity: 0.1, blend: "overlay" },
+        vellum_mist: { label: "Vellum Mist", baseFrequency: 1.1, numOctaves: 2, type: "fractalNoise", saturate: 0, tint: "#f4f6f7", tintOpacity: 0.07, blend: "soft-light" },
+      };
+      const ORDER = ["classic_matte", "whisper_weave", "sunbaked_parchment", "saddle_linen", "vellum_mist"];
+      const $ = (id) => document.getElementById(id);
+      const sel = $("tex");
+      ORDER.forEach((k) => { const o = document.createElement("option"); o.value = k; o.textContent = TEXTURES[k].label; sel.appendChild(o); });
+
+      function apply() {
+        const t = TEXTURES[sel.value];
+        const on = $("on").checked;
+        const intensity = Number($("int").value) / 100;
+        $("ft").setAttribute("type", t.type);
+        $("ft").setAttribute("baseFrequency", t.baseFrequency);
+        $("ft").setAttribute("numOctaves", t.numOctaves);
+        $("fs").setAttribute("values", t.saturate);
+        const g = $("grain"); g.style.mixBlendMode = t.blend; g.style.opacity = on ? intensity : 0;
+        const tint = $("tint");
+        if (on && t.tint !== "transparent" && t.tintOpacity > 0) { tint.style.background = t.tint; tint.style.opacity = t.tintOpacity; }
+        else tint.style.opacity = 0;
+      }
+      sel.addEventListener("change", apply);
+      $("on").addEventListener("change", apply);
+      $("int").addEventListener("input", () => { $("intv").textContent = $("int").value + "%"; apply(); });
+      apply();
+    </script>
+  </body>
+</html>

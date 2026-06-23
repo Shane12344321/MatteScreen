@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      :root { color-scheme: light dark; --accent: #6b8f71; }
+      * { box-sizing: border-box; -webkit-user-select: none; user-select: none; cursor: default; }
+      html, body { margin: 0; background: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      body { padding: 14px; color: #1f1d1a; }
+      .card {
+        background: rgba(250, 248, 243, 0.82);
+        -webkit-backdrop-filter: blur(30px) saturate(180%);
+        backdrop-filter: blur(30px) saturate(180%);
+        border: 0.5px solid rgba(0, 0, 0, 0.12);
+        border-radius: 16px;
+        box-shadow: 0 14px 44px rgba(0, 0, 0, 0.30), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+        padding: 14px 16px 16px;
+      }
+      @media (prefers-color-scheme: dark) {
+        body { color: #ece9e2; }
+        .card { background: rgba(40, 38, 34, 0.80); border-color: rgba(255,255,255,0.08); }
+        .btn, .link { background: rgba(255,255,255,0.06) !important; border-color: rgba(255,255,255,0.10) !important; }
+        .btn:hover, .link:hover { background: rgba(255,255,255,0.12) !important; }
+        .swatch { background: #2a2825 !important; }
+      }
+      header { display: flex; align-items: center; gap: 10px; }
+      header img { width: 30px; height: 30px; border-radius: 7px; }
+      header .t { font-weight: 600; font-size: 14px; line-height: 1.1; flex: 1; }
+      header .status { font-size: 11px; opacity: 0.55; font-weight: 400; margin-top: 1px; }
+      .switch { position: relative; width: 40px; height: 24px; flex: none; }
+      .switch input { opacity: 0; width: 0; height: 0; }
+      .sl { position: absolute; inset: 0; background: rgba(130,130,130,0.4); border-radius: 24px; transition: 0.2s; cursor: pointer; }
+      .sl::before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.35); }
+      .switch input:checked + .sl { background: var(--accent); }
+      .switch input:checked + .sl::before { transform: translateX(16px); }
+      section { margin-top: 15px; }
+      .label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.5; margin-bottom: 8px; font-weight: 600; }
+      .swatches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .swatch { position: relative; height: 56px; border-radius: 10px; overflow: hidden; border: 2px solid transparent; cursor: pointer; background: #fff; transition: border-color 0.15s, transform 0.1s; }
+      .swatch:active { transform: scale(0.97); }
+      .swatch.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+      .swatch svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .swatch .name { position: absolute; left: 0; right: 0; bottom: 0; font-size: 9px; padding: 3px 5px; background: rgba(0,0,0,0.42); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .row { display: flex; align-items: center; gap: 10px; }
+      input[type=range] { flex: 1; accent-color: var(--accent); height: 4px; }
+      .pct { font-variant-numeric: tabular-nums; font-size: 12px; opacity: 0.7; width: 36px; text-align: right; }
+      .snooze { display: flex; gap: 6px; }
+      .btn { flex: 1; font: inherit; font-size: 12px; padding: 7px 0; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.14); background: rgba(0,0,0,0.04); cursor: pointer; color: inherit; }
+      .btn:hover { background: rgba(0,0,0,0.08); }
+      .btn.on { background: var(--accent); color: #fff; border-color: transparent; }
+      footer { display: flex; gap: 8px; margin-top: 16px; }
+      .link { flex: 1; text-align: center; font-size: 12px; padding: 8px 0; border-radius: 8px; cursor: pointer; color: inherit; background: rgba(0,0,0,0.04); border: 0.5px solid rgba(0,0,0,0.12); }
+      .link:hover { background: rgba(0,0,0,0.08); }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <header>
+        <img id="appicon" src="../../assets/appicon.png" alt="" />
+        <div class="t">MatteScreen<div class="status" id="status">Active</div></div>
+        <label class="switch"><input type="checkbox" id="enabled" /><span class="sl"></span></label>
+      </header>
+
+      <section>
+        <div class="label">Texture</div>
+        <div class="swatches" id="swatches"></div>
+      </section>
+
+      <section>
+        <div class="label">Intensity — <span id="pct">22%</span></div>
+        <div class="row"><input type="range" id="intensity" min="15" max="30" step="1" /></div>
+      </section>
+
+      <section>
+        <div class="label">Snooze</div>
+        <div class="snooze">
+          <button class="btn" data-min="5">5 min</button>
+          <button class="btn" data-min="15">15 min</button>
+          <button class="btn" data-min="60">1 hour</button>
+        </div>
+      </section>
+
+      <footer>
+        <div class="link" id="settings">Settings…</div>
+        <div class="link" id="quit">Quit</div>
+      </footer>
+    </div>
+    <script src="ui-common.js"></script>
+    <script src="panel.js"></script>
+  </body>
+</html>
